@@ -1,0 +1,57 @@
+create database sql_project_population
+use sql_project_population
+
+
+CREATE TABLE `cia_factbook_FSDA` (
+	country VARCHAR(45) NOT NULL, 
+	area DECIMAL(38, 0), 
+	birth_rate DECIMAL(38, 2), 
+	death_rate DECIMAL(38, 2), 
+	infant_mortality_rate DECIMAL(38, 2), 
+	internet_users DECIMAL(38, 0), 
+	life_exp_at_birth DECIMAL(38, 2), 
+	maternal_mortality_rate DECIMAL(38, 0), 
+	net_migration_rate DECIMAL(38, 2), 
+	population DECIMAL(38, 0), 
+	population_growth_rate DECIMAL(38, 2)
+);
+
+LOAD DATA local INFILE "D:\cia_factbook_FSDA.csv"
+into table cia_factbook_FSDA
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"' 
+lines terminated by '\n'
+IGNORE 1 ROWS;
+
+select * from cia_factbook_FSDA
+
+ --------Which country has the highest population?
+ 
+select * from cia_factbook_FSDA where population in(select max(population) from cia_factbook_FSDA)
+
+--------Which country has the least number of people?
+
+select max(population) from cia_factbook_FSDA
+
+select country from cia_factbook_FSDA where population in(select min(population) from cia_factbook_FSDA)
+
+-----Which country is witnessing the highest population growth?
+
+select max(population_growth_rate) from cia_factbook_FSDA
+
+select * from cia_factbook_FSDA where population_growth_rate in
+(select max(population_growth_rate) from cia_factbook_FSDA)
+
+-----Which country has an extraordinary number for the population?
+
+ALTER TABLE cia_factbook_FSDA
+ADD COLUMN population_density VARCHAR(50);
+
+update cia_factbook_FSDA
+set population_density = (population/area );
+
+select country, population from cia_factbook_FSDA where population_density in(select max(population_density) from cia_factbook_FSDA);
+
+--------Which is the most densely populated country in the world?
+
+select country, round(population/area,2) densely_pop from cia_factbook_FSDA where area > 0 order by densely_pop desc limit 1;
